@@ -6,7 +6,7 @@ import random
 @dataclass
 class SudokuCell:
     number: Optional[int]
-    notes:list[int]
+    notes: list[int]
     coord: tuple[int, int]
     is_fixed: bool
 
