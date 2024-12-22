@@ -20,7 +20,7 @@ class color(Enum):
 root = tk.Tk()
 root.title("数独")
 cell_size = 50
-width, height = cell_size * 16, cell_size * 12
+width, height = cell_size * 18, cell_size * 14
 root.geometry(f'{width}x{height}')
 canvas = tk.Canvas(root, background=color.ORANGE.value,
                    highlightthickness=0)
@@ -28,6 +28,7 @@ canvas.place(x=0, y=0, width=width, height=height, anchor=tk.NW)
 
 sudoku = SudokuState(difficulty=Difficulty.EASY)
 sudoku_render = sr.SudokuRender(canvas, sudoku,
+                                coord=(cell_size, cell_size),
                                 cell_size=cell_size,
                                 cell_color1=color.WHITE.value,
                                 cell_color2=color.YELLOW.value,
@@ -38,7 +39,7 @@ sudoku_render = sr.SudokuRender(canvas, sudoku,
                                 num_color_fixed=color.BLACK.value,
                                 num_color_valid=color.GREY.value,
                                 num_color_invalid=color.RED.value)
-ctrl = ctl.Controller(root, sudoku, sudoku_render, cell_size=cell_size, bg=color.ORANGE.value, coord=(0, 0))
+ctrl = ctl.Controller(root, sudoku, sudoku_render, cell_size=cell_size, bg=color.ORANGE.value, coord=(cell_size, cell_size))
 
 sudoku_render.draw_sudoku()
 root.mainloop()

@@ -5,6 +5,7 @@ from typing import Optional
 class SudokuRender:
     canvas: tk.Canvas
     sudokustate: SudokuState
+    coord: tuple[int, int]
     cell_size: int
     size: int
     cell_color1: str
@@ -20,6 +21,7 @@ class SudokuRender:
 
     def __init__(self, canvas: tk.Canvas, sudokustate: SudokuState,
                  cell_size,
+                 coord,
                  cell_color1,
                  cell_color2,
                  cell_color_selected,
@@ -31,6 +33,7 @@ class SudokuRender:
                  num_color_invalid):
         self.canvas = canvas
         self.sudokustate = sudokustate
+        self.coord = coord
         self.cell_size = cell_size
         self.size = cell_size * 9
         self.cell_color1 = cell_color1
@@ -45,7 +48,7 @@ class SudokuRender:
         self.selected_cell = None
 
         def on_click(event):
-            x, y = event.x, event.y
+            x, y = event.x - self.coord[0], event.y - self.coord[1]
             if not (0 <= x < self.size and 0 <= y < self.size):
                 return
             selected_row, selected_col = y // self.cell_size, x // self.cell_size
@@ -104,7 +107,7 @@ class SudokuRender:
         return mini_number_size * mini_cell_x, mini_number_size * mini_cell_y
 
     def __get_cellpos(self, row: int, col: int) -> tuple[int, int]:
-        return self.cell_size * col, self.cell_size * row
+        return self.coord[0] + self.cell_size * col, self.coord[1] + self.cell_size * row
 
     def __get_cell_color(self, row: int, col: int) -> str:
         if self.selected_cell is not None:

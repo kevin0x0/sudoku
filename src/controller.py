@@ -11,6 +11,8 @@ SudokuOperation = tuple[int, int, Optional[int], Optional[int]]
 difficulty_options = [d.name for d in Difficulty]
 difficulty_map = { d.name: d for d in Difficulty }
 
+GameState = Literal["running", "complete", "auto"]
+
 class Controller:
     root: tk.Tk
     sudoku: SudokuState
@@ -31,7 +33,7 @@ class Controller:
     label_game_state: tk.Label
     time: int
     do_noting: bool
-    game_state: Literal["running", "complete", "auto"]
+    game_state: GameState
 
     def __init__(self, root, sudoku, sudoku_render, /, cell_size, bg: str, coord: tuple[int, int]):
         self.root = root
@@ -46,7 +48,7 @@ class Controller:
         self.__init_menu_bar(root)
 
     def __init_controls(self, root, cell_size, bg, coord):
-        self.label_game_state = tk.Label(root, text="", bg=bg, font=("Arial", cell_size // 2))
+        self.label_game_state = tk.Label(root, text="", bg=bg, font=("hei", cell_size // 2))
         self.buttons_number = [tk.Button(root, text=number, command=self.__get_handler_on_click_number(number))
                                for number in range(1, 10)]
         self.button_clear = tk.Button(root, text="清除", command=lambda: self.__clear())
@@ -81,19 +83,16 @@ class Controller:
         self.label_timer.place(x=x, y=y)
 
     def __show_solution(self, solution: list[tuple[int, int, int]]):
-        self.game_state = "auto"
+        self.__set_game_state("auto")
         self.do_noting = False
-        self.label_game_state.config(text="自动求解中")
-        self.op_stack.clear()
-        self.op_stack_listbox.delete(0, tk.END)
-        self.__restart_timer()
 
         for (row, col, val) in solution:
             self.__set_number(row, col, val)
             self.sudoku_render.draw_sudoku()
             time.sleep(0.5)
 
-        assert self.__game_is_complete()
+        if not self.__game_is_complete():
+            self.__set_game_state("running")
 
 
     def __init_menu_bar(self, root):
@@ -124,6 +123,13 @@ class Controller:
     def __game_is_complete(self):
         return self.game_state == "complete"
 
+    def __set_game_state(self, state: GameState):
+        self.game_state = state
+        match state:
+            case "running": self.label_game_state.config(text="")
+            case "auto": self.label_game_state.config(text="自动求解中")
+            case "complete": self.label_game_state.config(text="游戏结束")
+
     def __op_stack_pop(self) -> SudokuOperation:
         self.op_stack_listbox.delete(tk.END)
         return self.op_stack.pop()
@@ -137,7 +143,7 @@ class Controller:
         self.__op_stack_push((row, col, self.sudoku.get_cell(row, col).number, number))
         self.sudoku.set_cell(row, col, number)
         if self.sudoku.is_solved():
-            self.__game_complete()
+            self.__set_game_state("complete")
 
     def __get_handler_on_click_number(self, number: int) -> Callable[[], None]:
         def handler():
@@ -220,18 +226,13 @@ class Controller:
         self.time = -1
         self.__update_time()
 
-    def __game_complete(self):
-        self.game_state = "complete"
-        self.label_game_state.config(text="游戏结束")
-
     def __restart(self):
         if self.__game_is_auto():
             return
-        self.game_state = "running"
+        self.__set_game_state("running")
         self.do_noting = False
         self.sudoku.restart(difficulty_map[self.selected_restart_option.get()])
         self.sudoku_render.restart()
-        self.label_game_state.config(text="")
         self.op_stack.clear()
         self.op_stack_listbox.delete(0, tk.END)
         self.__restart_timer()
