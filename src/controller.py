@@ -83,11 +83,14 @@ class Controller:
         self.label_timer.place(x=x, y=y)
 
     def __show_solution(self, solution: list[tuple[int, int, int]]):
+        if self.__game_is_complete():
+            return
+
         self.__set_game_state("auto")
         self.do_noting = False
 
         for (row, col, val) in solution:
-            self.__set_number(row, col, val)
+            self.__set_answer(row, col, val)
             self.sudoku_render.draw_sudoku()
             time.sleep(0.5)
 
@@ -139,7 +142,7 @@ class Controller:
         self.op_stack.append(op)
         self.op_stack_listbox.see(tk.END) 
 
-    def __set_number(self, row, col, number):
+    def __set_answer(self, row, col, number):
         self.__op_stack_push((row, col, self.sudoku.get_cell(row, col).number, number))
         self.sudoku.set_cell(row, col, number)
         if self.sudoku.is_solved():
@@ -156,7 +159,7 @@ class Controller:
             if self.do_noting:
                 self.sudoku.add_note(row, col, number)
             else:
-                self.__set_number(row, col, number)
+                self.__set_answer(row, col, number)
 
             self.sudoku_render.draw_sudoku()
         return handler
