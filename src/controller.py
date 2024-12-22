@@ -128,10 +128,12 @@ class Controller:
 
     def __set_game_state(self, state: GameState):
         self.game_state = state
-        match state:
-            case "running": self.label_game_state.config(text="")
-            case "auto": self.label_game_state.config(text="自动求解中")
-            case "complete": self.label_game_state.config(text="游戏结束")
+        msg_map = {
+            "running": "",
+            "auto": "自动求解中",
+            "complete": "游戏结束",
+        }
+        self.label_game_state.config(text=msg_map[state])
 
     def __op_stack_pop(self) -> SudokuOperation:
         self.op_stack_listbox.delete(tk.END)
